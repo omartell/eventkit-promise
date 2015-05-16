@@ -23,7 +23,7 @@ require 'eventkit/promise'
 
 promise = Eventkit::Promise.new
 
-promise.then(-> (value) { value + 1 })
+promise.then(->(value) { value + 1 })
 
 promise.resolve(1)
 
@@ -34,10 +34,10 @@ promise.value # => 1
 promise = Eventkit::Promise.new
 
 promise.then(
-  -> (value) {
+  ->(value) {
     value + 1
   },
-  -> (error) {
+  ->(error) {
     log(error.message)
   }
 )
