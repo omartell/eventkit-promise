@@ -170,15 +170,15 @@ module Eventkit
       it 'pipelines the value from on fullfiled to the returned promise' do
         expect do |block|
           promise
-            .then(-> (value) {
+            .then(->(value) {
                     block.to_proc.call(value + 1)
                     value + 1
                   })
-            .then(-> (value) {
+            .then(->(value) {
                     block.to_proc.call(value + 5)
                     value + 5
                   })
-            .then(-> (value) {
+            .then(->(value) {
                     block.to_proc.call(value + 10)
                     value + 10
                   })
@@ -189,15 +189,15 @@ module Eventkit
       it 'pipelines the value from on rejected to the returned promise' do
         expect do |block|
           promise
-            .then(nil, -> (reason) {
+            .then(nil, ->(reason) {
                     block.to_proc.call('bar')
                     'bar'
                   })
-            .then(-> (reason) {
+            .then(->(reason) {
                     block.to_proc.call('baz')
                     'baz'
                   })
-            .then(-> (reason) {
+            .then(->(reason) {
                     block.to_proc.call('zoo')
                     'zoo'
                   })
@@ -206,7 +206,7 @@ module Eventkit
       end
 
       it 'rejects the returned promise when on fullfiled throws an exception' do
-        promise_b = promise.then(-> (value) { fail ArgumentError })
+        promise_b = promise.then(->(value) { fail ArgumentError })
 
         promise.resolve('foobar')
 
@@ -216,8 +216,8 @@ module Eventkit
 
       it 'rejects the returned promise when on rejected throws an exception' do
         promise_b = promise
-                      .then(-> (value) { fail ArgumentError })
-                      .then(nil, -> (value) { fail NoMethodError })
+                      .then(->(value) { fail ArgumentError })
+                      .then(nil, ->(value) { fail NoMethodError })
 
         promise.resolve('foobar')
 
