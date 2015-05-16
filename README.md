@@ -2,6 +2,8 @@
 
 Promises/A+ for Ruby
 
+[![Build Status](https://travis-ci.org/omartell/eventkit-promise.svg?branch=master)](https://travis-ci.org/omartell/eventkit-promise)
+
 Supported Ruby versions: 1.9.3, 2.0, 2.1, 2.2
 
 ## Installation
