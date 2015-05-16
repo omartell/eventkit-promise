@@ -318,6 +318,14 @@ module Eventkit
         expect(promise).to be_rejected
         expect(promise.reason).to be_an_instance_of(NoMethodError)
       end
+
+      it 'accepts a block when initialized' do
+        promise = Promise.new do |p|
+          p.resolve('foobar')
+        end
+
+        expect(promise.value).to eq('foobar')
+      end
     end
   end
 end

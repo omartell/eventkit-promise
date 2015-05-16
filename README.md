@@ -86,6 +86,14 @@ promise_b.reject('Ooops can not continue')
 
 promise_a.reason # => 'Ooops can not continue'
 
+# Initializing with a block
+
+promise = Promise.new do |p|
+  p.resolve('foobar')
+end
+
+promise.value # => 'foobar'
+
 ```
 
 ## Development

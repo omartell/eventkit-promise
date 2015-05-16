@@ -9,6 +9,7 @@ module Eventkit
       @on_rejected  = []
       @state = :pending
       @resolved_with_promise = false
+      yield(self) if block_given?
     end
 
     def pending?
