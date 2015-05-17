@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["oliver.martell@gmail.com"]
 
   spec.summary       = "Promises/A+ for Ruby"
-  spec.description   = "Ruby implementation of https://promisesaplus.com/"
+  spec.description   = "Ruby implementation of Promises/A+ https://promisesaplus.com/"
   spec.homepage      = "http://github.com/omartell/eventkit-promise"
   spec.license       = "MIT"
 
