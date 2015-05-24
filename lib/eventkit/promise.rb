@@ -1,6 +1,6 @@
 module Eventkit
   class Promise
-    VERSION = '0.1.0'
+    VERSION = '1.0'
     attr_reader :value, :task_scheduler
     private :value
 
