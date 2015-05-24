@@ -1,15 +1,16 @@
 module Eventkit
   class Promise
-    VERSION = "0.1.0"
-    attr_reader :value
-    alias_method :reason, :value
+    VERSION = '0.1.0'
+    attr_reader :value, :task_scheduler
+    private :value
 
-    def initialize
+    def initialize(task_scheduler)
       @on_fullfiled = []
       @on_rejected  = []
       @state = :pending
+      @task_scheduler = task_scheduler
       @resolved_with_promise = false
-      yield(self) if block_given?
+      yield self if block_given?
     end
 
     def pending?
@@ -25,7 +26,7 @@ module Eventkit
     end
 
     def then(on_fullfiled_handler = nil, on_rejected_handler = nil)
-      promise = Promise.new
+      promise = Promise.new(task_scheduler)
 
       add_on_fullfiled { |value|
         begin
@@ -86,7 +87,7 @@ module Eventkit
 
     def add_on_fullfiled(&handler)
       if resolved?
-        handler.call(value)
+        schedule_execution(handler)
       else
         @on_fullfiled << handler
       end
@@ -94,7 +95,7 @@ module Eventkit
 
     def add_on_rejected(&handler)
       if rejected?
-        handler.call(value)
+        schedule_execution(handler)
       else
         @on_rejected << handler
       end
@@ -112,15 +113,18 @@ module Eventkit
       else
         @state = :resolved
         @value = value
-        @on_fullfiled.each { |handler| handler.call(value) }
+        @on_fullfiled.each(&method(:schedule_execution))
       end
     end
 
     def run_rejection(value)
       @value = value
-      @on_rejected.each { |handler| handler.call(value) }
+      @on_rejected.each(&method(:schedule_execution))
       @state = :rejected
+    end
+
+    def schedule_execution(handler)
+      task_scheduler.schedule_execution { handler.call(value) }
     end
   end
 end
-

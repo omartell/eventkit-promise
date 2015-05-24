@@ -14,6 +14,55 @@ Add this line to your application's Gemfile:
 gem 'eventkit-promise'
 ```
 
+## Configuration
+
+On fullfiled and on rejected handlers should execute asynchronously
+according to the [Promises\A+ spec]
+(https://promisesaplus.com/#point-67). So, the main dependency
+for an `Eventkit::Promise` is the object that provides the execution
+context for handlers, which we will be calling the `TaskScheduler`.
+
+In your project, you will need to define an implementation for a
+`TaskScheduler`, which sould have a `#schedule_execution` method that
+takes a block.
+
+If you're using something like Event Machine, then you could do
+something like this:
+
+```ruby
+require 'eventkit/task_scheduler'
+
+class EMTaskScheduler < EventKit::TaskScheduler
+  def schedule_execution(&block)
+    EM::next_tick(&block)
+  end
+end
+
+task_scheduler = EMTaskScheduler.new
+
+Eventkit::Promise.new(task_scheduler)
+```
+
+If you're using `Eventkit::Eventloop`, then you could do:
+
+```ruby
+require 'eventkit/task_scheduler'
+
+class NextTickScheduler < Eventkit::TaskScheduler
+  def initialize(event_loop)
+    @event_loop = event_loop
+  end
+
+  def schedule_execution(&block)
+    @event_loop.on_next_tick(&block)
+  end
+end
+
+task_scheduler = NextTickScheduler.new
+
+Eventkit::Promise.new(task_scheduler)
+```
+
 ## Usage
 
 ```ruby
@@ -21,17 +70,15 @@ require 'eventkit/promise'
 
 # Resolving a promise
 
-promise = Eventkit::Promise.new
+promise = Eventkit::Promise.new(task_scheduler)
 
 promise.then(->(value) { value + 1 })
 
 promise.resolve(1)
 
-promise.value # => 1
-
 # Rejecting a promise
 
-promise = Eventkit::Promise.new
+promise = Eventkit::Promise.new(task_scheduler)
 
 promise.then(
   ->(value) {
@@ -44,11 +91,9 @@ promise.then(
 
 promise.reject(NoMethodError.new('Undefined method #call'))
 
-promise.reason # => <NoMethodError: undefined method #call>
-
 # Chaining promises
 
-promise_a = Eventkit::Promise.new
+promise_a = Eventkit::Promise.new(task_scheduler)
 
 promise_b = promise_a
   .then(->(v) { v + 1 })
@@ -61,38 +106,29 @@ promise_b.catch { |error|
 
 promise_a.resolve(1)
 
-promise_a.value # => 1
-promise_b.value # => 4
-
 # Resolving and fullfiling with another promise
 
-promise_a = Eventkit::Promise.new
-promise_b = Eventkit::Promise.new
+promise_a = Eventkit::Promise.new(task_scheduler)
+promise_b = Eventkit::Promise.new(task_scheduler)
 
 promise_a.resolve(promise_b)
 
 promise_b.resolve('foobar')
 
-promise_a.value # => foobar
-
 # Resolving and rejecting with another promise
 
-promise_a = Eventkit::Promise.new
-promise_b = Eventkit::Promise.new
+promise_a = Eventkit::Promise.new(task_scheduler)
+promise_b = Eventkit::Promise.new(task_scheduler)
 
 promise_a.resolve(promise_b)
 
 promise_b.reject('Ooops can not continue')
 
-promise_a.reason # => 'Ooops can not continue'
-
 # Initializing with a block
 
-promise = Promise.new do |p|
+promise = Promise.new(task_scheduler) do |p|
   p.resolve('foobar')
 end
-
-promise.value # => 'foobar'
 
 ```
 
